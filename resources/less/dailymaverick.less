@@ -1,0 +1,79 @@
+@import "variables.less";
+@import "elements.less";
+
+body {
+	margin: 0px;
+	padding: 0px;
+}
+#convene_interface {
+	#login_dialog {
+		font-size: 8pt;
+		.form {
+			margin: 10px 0px;
+			
+			label {
+				text-transform: normal;
+			}
+			
+			input[type=text], input[type=password], {
+				width: 125px;
+				background-color: #E7E7E8;
+				border: none;
+				padding: 2px;
+			}
+			
+			#btn_login {
+				background-color: @orange;
+				border: none;
+				padding: 3px;
+				text-transform: uppercase;
+				font-weight: bold;
+				color: #FFF;
+				font-family: helvetica;
+				height: 17px;
+				font-size: 10px;
+			}
+			
+		}
+	}
+	
+	#comment_subscribe {
+		color: @linkscolour;
+		cursor: pointer;
+	}
+	
+	#submit_comment {
+		background-color: @orange;
+		border: none;
+		padding: 3px;
+		text-transform: uppercase;
+		font-weight: bold;
+		color: #FFF;
+		font-family: helvetica;
+		height: 17px;
+		font-size: 10px;
+		width: auto;
+	}
+	
+	
+	font-family: @sans;
+	font-size: 10pt;
+	margin: 0px;
+
+	img {
+		border: none;
+	}
+
+	hr {
+		display: none;
+	}
+
+	a {
+		color: @linkscolour;
+		text-decoration: none;
+	}
+	
+	.spinner {
+		display: none;
+	}
+}
