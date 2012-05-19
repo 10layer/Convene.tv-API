@@ -2,4 +2,7 @@
 	header("Content-Type: application/json");
 	header("Access-Control-Allow-Origin: *");
 ?>
-<?= json_encode($data) ?>
+<?php
+	$jsoncallback=$this->input->get("jsoncallback");
+?>
+<?= (empty($jsoncallback)) ? json_encode($data) : "$jsoncallback(".json_encode($data).")" ?>

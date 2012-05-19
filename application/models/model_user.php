@@ -3,11 +3,7 @@
 		public $table="users";
 				
 		public function login($email,$password) {
-			$this->db->select("users.*");
-			$this->db->from("users");
-			$this->db->where("email",$email);
-			$this->db->where("password",$password);
-			$this->db->where("active",1);
+			$this->db->select("users.*")->from("users")->where("email",$email)->where("password",$password)->where("active",1);
 			$query=$this->db->get();
 			if ($query->num_rows()==0) {
 				return false;

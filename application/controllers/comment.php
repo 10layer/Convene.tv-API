@@ -17,77 +17,105 @@
 		}
 		
 		public function draw() {
+			$this->load->library("convene_security");
+			$this->convene_security->private_only();
+			$publication_id=$this->convene_security->publication_id();
 			$this->load->library("comments");
 			$this->load->library("session");
-			$this->comments->draw_comments();
-		}
-		
-		public function iframe() {
-			$this->load->library("session");
-			$this->load->view("iframe");
+			$urlid=$this->uri->segment(3);
+			if (empty($urlid)) {
+				return false;
+			}
+			$data["urlid"]=$urlid;
+			$data["public_key"]=$this->convene_security->public_key();
+			$this->load->view("comments",$data);
 		}
 		
 		public function get() {
-			$this->load->model("model_article");
+			$this->load->library("convene_security");
+			$publication_id=$this->convene_security->publication_id();
 			$this->load->model("model_comment");
 			$urlid=$this->uri->segment(3);
-			$article=$this->model_article->get($urlid);
-			if (empty($article->id)) {
+			if (empty($urlid)) {
 				return false;
 			}
-			$comments=$this->model_comment->get_by_article($article->id);
+			$comments=$this->model_comment->get_by_article($urlid, $publication_id);
 			for($x=0; $x<sizeof($comments); $x++) { //Prep and add data
 				$commentdate=strtotime($comments[$x]->date_created);
 				$comments[$x]->commentdate=date("D, j M Y",$commentdate);
 				$comments[$x]->commenttime=date("H:i",$commentdate);
 				$comments[$x]->comment=nl2br($comments[$x]->comment);
 			}
-			for($x=sizeof($comments)-1; $x>=0; $x--) {	//Put in our levels
-				if ($comments[$x]->parent_id != 0) {
-					for($y=sizeof($comments)-1; $y>=0; $y--) {
-						if ($comments[$y]->id==$comments[$x]->parent_id) {
-							$comments[$x]->level=$comments[$y]->level + 1;
-							$tmp=array_splice($comments, $x, 1);
-							//print_r($tmp);
-							//print $x." ".$y;
-							$comments=array_merge(
-								array_slice($comments, 0, $y+1),
-								$tmp,
-								array_slice($comments, $y+1)
-							);
-							//print_r($comments);
-							break;
+			$comments=$this->_sort_comments($comments);
+			$data["comments"]=$comments;
+			$data["comment_count"]=$this->model_comment->count_by_article($urlid, $publication_id);
+			$data["commentalert"]=$this->model_comment->check_subscribe($urlid, $publication_id);
+			$this->load->view("json", array("data"=>$data));
+		}
+		
+		protected function _sort_comments($comments) {
+			$result=array();
+			$tmp=array();
+			while(!empty($comments)) {
+				$comment=array_shift($comments);
+				if ($comment->parent_id == 0) {
+					$result[] = $comment;
+				} else {
+					$tmp[] = $comment;
+				}
+			}
+			$comments = $tmp;
+			$comments=array_reverse($comments);
+			while(!empty($comments)) {
+				for($x=0; $x<sizeof($result); $x++) {
+					for($y=0; $y<sizeof($comments); $y++) {
+						if ($comments[$y]->parent_id==$result[$x]->id) {
+							$comments[$y]->level=$result[$x]->level+1;
+							if ($comments[$y]->level >=3) {
+								$comments[$y]->level=2;
+							}
+							array_splice($result, $x+1, 0, array_splice($comments, $y, 1));
 						}
 					}
 				}
 			}
-			$data["comments"]=$comments;
-			$data["comment_count"]=$this->model_comment->count_by_article($article->id);
-			$this->load->view("json", array("data"=>$data));
+			return $result;
 		}
 		
-		public function ajax_submit() {
-			$comment=$this->input->post("comment");
-			$article_id=$this->input->post("article_id");
-			$parent=$this->input->post("parent_id");
-			print json_encode($this->submit($comment, $article_id, $parent));
-			return true;
+		public function ajax_submit() {	
+			$this->load->library("convene_security");
+			$public_key=$this->convene_security->public_key();
+			if (empty($public_key)) {
+				$this->load->view("json", array("data"=>array("success"=>false, "message"=>"Public key error")));
+				return true;
+			}
+			$comment=$this->input->get_post("comment");
+			$article_id=$this->input->get_post("article_id");
+			$parent=$this->input->get_post("parent_id");
+			$result=$this->submit($comment, $article_id, $parent);
+			$this->load->view("json", array("data"=>$result));
 		}
 		
-		public function ajax_subscribe($article_id) {
+		public function ajax_subscribe($urlid) {
+			$this->load->library("convene_security");
+			$publication_id=$this->convene_security->publication_id();
+			if (empty($publication_id)) {
+				$this->load->view("json", array("data"=>array("success"=>false, "message"=>"Public key error")));
+				return true;
+			}
 			$this->load->model("model_comment");
 			$this->load->library("session");
 			$result=array(
 				"success"=>false,
 				"message"=>"",
 			);
-			$alert=$this->model_comment->check_subscribe($article_id);
+			$alert=$this->model_comment->check_subscribe($urlid, $publication_id);
 			if ($alert) {
-				$this->model_comment->unsubscribe($article_id);
+				$this->model_comment->unsubscribe($urlid, $publication_id);
 				$result["success"]=true;
 				$result["message"]="unsubscribed";
 			} else {
-				$this->model_comment->subscribe($article_id);
+				$this->model_comment->subscribe($urlid, $publication_id);
 				$result["success"]=true;
 				$result["message"]="subscribed";
 			}
@@ -110,7 +138,8 @@
 				$result["message"]="Missing information";
 				return $result;
 			}
-			if ($this->model_comment->submit($comment, $article_id, $parent, $userid)) {
+			$publication_id=$this->convene_security->publication_id();
+			if ($this->model_comment->submit($comment, $article_id, $parent, $userid, $publication_id)) {
 				$result["success"]=true;
 			} else {
 				$result["message"]="Comment already exists";

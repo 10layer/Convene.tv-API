@@ -6,20 +6,18 @@ class Comments {
 	public function __construct() {
 		$this->ci=&get_instance();
 		$this->ci->load->model("model_comment");
-		$this->ci->load->model("model_article");
 		$this->ci->load->model("model_user");
 		$this->ci->load->library('akismet');
 	}
 
 	public function draw_comments() {
 		$urlid=$this->ci->uri->segment(3);
-		$article=$this->ci->model_article->get($urlid);
-		if (empty($article->id)) {
+		if (empty($urlid)) {
 			return false;
 		}
-		$data["comments"]=$this->ci->model_comment->get_by_article($article->id);
-		$data["commentalert"]=$this->ci->model_comment->check_subscribe($article->id);
-		$data["article"]=$article;
+		$data["comments"]=$this->ci->model_comment->get_by_article($urlid);
+		$data["commentalert"]=$this->ci->model_comment->check_subscribe($urlid);
+		$data["urlid"]=$urlid;
 		$this->ci->load->view("comments",$data);
 	}
 

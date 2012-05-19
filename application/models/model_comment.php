@@ -1,21 +1,21 @@
 <?php
 	class Model_Comment extends CI_Model {
 		
-		public function get_by_article($id) {
+		public function get_by_article($urlid, $publication_id) {
 			$this->db->select("comments.*");
 			$this->db->select("0 AS level", false);
 			$this->db->select("users.fname, users.sname");
 			$this->db->from("comments");
 			$this->db->join("users","users.id=comments.user_id");
-			$this->db->where("article_id",$id);
+			$this->db->where("urlid",$urlid)->where("publication_id", $publication_id);
 			//$this->db->where("parent_id",0);
 			$this->db->order_by("comments.date_created");
 			$query=$this->db->get();
 			return $query->result();
 		}
 		
-		public function count_by_article($id) {
-			return $this->db->select("*")->from("comments")->where("article_id",$id)->get()->num_rows();
+		public function count_by_article($urlid, $publication_id) {
+			return $this->db->select("*")->from("comments")->where("urlid",$urlid)->where("publication_id",$publication_id)->get()->num_rows();
 		}
 
 		public function get_children($id) {
@@ -28,8 +28,8 @@
 			return $query->result();
 		}
 
-		public function checkdouble($articleid,$comment) {
-			$query=$this->db->get_where("comments",array("article_id"=>$articleid,"comment"=>$comment));
+		public function checkdouble($urlid,$publication_id,$comment) {
+			$query=$this->db->get_where("comments",array("urlid"=>$urlid, "publication_id"=>$publication_id, "comment"=>$comment));
 			if ($query->num_rows()>0) {
 				return true;
 			}
@@ -49,22 +49,22 @@
 			return $query->result();
 		}
 
-		public function subscribe($articleid) {
+		public function subscribe($urlid, $publication_id) {
 			$userid=$this->session->userdata("user_id");
-			$this->db->insert("article_alerts",array("article_id"=>$articleid,"user_id"=>$userid));
+			$this->db->insert("article_alerts",array("urlid"=>$urlid,"user_id"=>$userid, "publication_id"=>$publication_id));
 		}
 
-		public function unsubscribe($articleid) {
+		public function unsubscribe($urlid, $publication_id) {
 			$userid=$this->session->userdata("user_id");
-			$this->db->delete("article_alerts",array("article_id"=>$articleid,"user_id"=>$userid));
+			$this->db->delete("article_alerts",array("urlid"=>$urlid,"user_id"=>$userid, "publication_id"=>$publication_id));
 		}
 
-		public function check_subscribe($articleid) {
+		public function check_subscribe($urlid, $publication_id) {
 			$userid=$this->session->userdata("user_id");
 			if (empty($userid)) {
 				return false;
 			}
-			$query=$this->db->get_where("article_alerts",array("article_id"=>$articleid,"user_id"=>$userid));
+			$query=$this->db->get_where("article_alerts",array("urlid"=>$urlid,"user_id"=>$userid, "publication_id"=>$publication_id));
 			$result=$query->row();
 			return (!empty($result->id));
 		}
@@ -78,15 +78,16 @@
 			return $query->result();
 		}
 		
-		public function submit($comment, $article_id, $parent_id=0, $user_id) {
-			if ($this->checkdouble($article_id, $comment)) {
+		public function submit($comment, $urlid, $parent_id=0, $user_id, $publication_id) {
+			if ($this->checkdouble($urlid, $publication_id, $comment)) {
 				return false;
 			}
 			$dbdata=array(
 				"comment"=>strip_tags($comment),
 				"user_id"=>$user_id,
-				"article_id"=>$article_id,
+				"urlid"=>$urlid,
 				"parent_id"=>$parent_id,
+				"publication_id"=>$publication_id
 			);
 			$this->db->insert("comments",$dbdata);
 			return true;
