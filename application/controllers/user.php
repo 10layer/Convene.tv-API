@@ -24,9 +24,11 @@
 		}
 		
 		public function login() {
+			$this->load->library("convene_security");
+			$publication_id=$this->convene_security->publication_id();
 			$email=$this->input->get_post("email");
 			$password=$this->input->get_post("password");
-			$result=$this->_login($email, $password);
+			$result=$this->_login($email, $password, $publication_id);
 			$this->load->view("json", array("data"=>$result));
 		}
 		
@@ -141,7 +143,7 @@
 			}
 		}
 		
-		protected function _login($email, $password) {
+		protected function _login($email, $password, $publication_id) {
 			$this->load->model("model_user");
 			$result=array(
 				"success"=>false,
@@ -161,12 +163,12 @@
 				$result["message"]="Email or password incorrect";
 				return $result;
 			}
-			$result['user']=$this->_check_login();
+			$result['user']=$this->_check_login($publication_id);
 			$result["success"]=true;
 			return $result;
 		}
 		
-		protected function _check_login() {
+		protected function _check_login($publication_id) {
 			$result=array("logged_in"=>false);
 			$user_id=$this->session->userdata("user_id");
 			if (!empty($user_id)) {

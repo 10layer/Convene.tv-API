@@ -55,6 +55,7 @@
 		public function subscribe($urlid, $publication_id) {
 			$userid=$this->session->userdata("user_id");
 			$this->db->insert("article_alerts",array("urlid"=>$urlid,"user_id"=>$userid, "publication_id"=>$publication_id));
+			print_r($this->session);
 		}
 
 		public function unsubscribe($urlid, $publication_id) {
@@ -90,7 +91,8 @@
 				"user_id"=>$user_id,
 				"urlid"=>$urlid,
 				"parent_id"=>$parent_id,
-				"publication_id"=>$publication_id
+				"publication_id"=>$publication_id,
+				"live"=>1,
 			);
 			$this->db->insert("comments",$dbdata);
 			return true;

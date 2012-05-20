@@ -122,6 +122,29 @@
 			$this->load->view("json", array("data"=>$result));
 		}
 		
+		public function ajax_check_subscribe($urlid) {
+			$this->load->library("convene_security");
+			$publication_id=$this->convene_security->publication_id();
+			if (empty($publication_id)) {
+				$this->load->view("json", array("data"=>array("success"=>false, "message"=>"Public key error")));
+				return true;
+			}
+			$this->load->model("model_comment");
+			$result=array(
+				"success"=>false,
+				"message"=>"",
+			);
+			$alert=$this->model_comment->check_subscribe($urlid, $publication_id);
+			if ($alert) {
+				$result["success"]=true;
+				$result["message"]="subscribed";
+			} else {
+				$result["success"]=true;
+				$result["message"]="unsubscribed";
+			}
+			$this->load->view("json", array("data"=>$result));
+		}
+		
 		protected function submit($comment, $article_id, $parent) {
 			$result=array(
 				"success"=>false,

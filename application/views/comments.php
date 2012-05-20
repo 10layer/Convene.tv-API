@@ -51,9 +51,19 @@
 				function(data) {
 					$("#spinner").hide();
 					if (data.success) {
+						data.user.subscribed=false;
 						$("#comments-actions").html(_.template($("#comments-loggedin-template").html(), data.user));
 						$(".commentreply-span").each(function() {
 							$(this).removeClass("hidden");
+						});
+						$.getJSON("<?= base_url() ?>comment/ajax_check_subscribe/<?= $urlid ?>/<?= $public_key ?>?jsoncallback=?", function(data) {
+							if (data.success) {
+								if (data.message=="subscribed") {
+									$("#comment_subscribe").html("Unsubscribe from this article's comments");
+								} else {
+									$("#comment_subscribe").html("Subscribe to this article's comments");
+								}
+							}
 						});
 					} else {
 						$("#comments-message").html("<strong>Unable to log in</strong><br /> "+data.message).slideDown();
