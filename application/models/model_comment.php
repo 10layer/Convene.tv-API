@@ -51,6 +51,75 @@
 			$query=$this->db->get();
 			return $query->result();
 		}
+		
+		public function search_admin($searchstring, $start=0,$limit=25, $publication_id) {
+			$this->_search_admin($searchstring, $publication_id);
+			$this->db->limit($limit,$start);
+			$query=$this->db->get();
+			return $query->result();
+		}
+		
+		public function search_admin_count($searchstring, $publication_id) {
+			$this->_search_admin($searchstring, $publication_id);
+			return $this->db->get()->num_rows();
+		}
+		
+		protected function _search_admin($searchstring, $publication_id) {
+			$this->db->select("comments.id,comments.comment, comments.date_created, comments.urlid, comments.live");
+			$this->db->select("users.fname, users.sname, users.id AS user_id");
+			$this->db->from("comments");
+			$this->db->join("users","users.id=comments.user_id");
+			$this->db->like("comment", $searchstring);
+			$this->db->where("publication_id", $publication_id);
+			$this->db->order_by("date_created DESC");
+		}
+		
+		public function usersearch_admin($searchstring, $start=0,$limit=25, $publication_id) {
+			$this->_usersearch_admin($searchstring, $publication_id);
+			$this->db->limit($limit,$start);
+			$query=$this->db->get();
+			return $query->result();
+		}
+		
+		public function usersearch_admin_count($searchstring, $publication_id) {
+			$this->_usersearch_admin($searchstring, $publication_id);
+			return $this->db->get()->num_rows();
+		}
+		
+		protected function _usersearch_admin($searchstring, $publication_id) {
+			$this->db->select("comments.id,comments.comment, comments.date_created, comments.urlid, comments.live");
+			$this->db->select("users.fname, users.sname, users.id AS user_id");
+			$this->db->from("comments");
+			$this->db->join("users","users.id=comments.user_id");
+			$this->db->like("users.fname", $searchstring);
+			$this->db->or_like("users.sname", $searchstring);
+			$this->db->or_like("users.email", $searchstring);
+			$this->db->or_like("CONCAT(TRIM(users.fname), ' ', TRIM(users.sname))", $searchstring);
+			$this->db->where("publication_id", $publication_id);
+			$this->db->order_by("date_created DESC");
+		}
+		
+		public function urlidsearch_admin($searchstring, $start=0,$limit=25, $publication_id) {
+			$this->_urlidsearch_admin($searchstring, $publication_id);
+			$this->db->limit($limit,$start);
+			$query=$this->db->get();
+			return $query->result();
+		}
+		
+		public function urlidsearch_admin_count($searchstring, $publication_id) {
+			$this->_urlidsearch_admin($searchstring, $publication_id);
+			return $this->db->get()->num_rows();
+		}
+		
+		protected function _urlidsearch_admin($searchstring, $publication_id) {
+			$this->db->select("comments.id,comments.comment, comments.date_created, comments.urlid, comments.live");
+			$this->db->select("users.fname, users.sname, users.id AS user_id");
+			$this->db->from("comments");
+			$this->db->join("users","users.id=comments.user_id");
+			$this->db->like("comments.urlid", $searchstring);
+			$this->db->where("publication_id", $publication_id);
+			$this->db->order_by("date_created DESC");
+		}
 
 		public function subscribe($urlid, $publication_id) {
 			$userid=$this->session->userdata("user_id");
@@ -108,6 +177,11 @@
 		
 		public function live($comment_id) {
 			$this->db->where("id",$comment_id)->update("comments", array("live"=>true));
+			return true;
+		}
+		
+		public function update($comment_id, $data) {
+			$this->db->where("id",$comment_id)->update("comments", $data);
 			return true;
 		}
 	}
