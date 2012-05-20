@@ -43,6 +43,11 @@ class Convene_Security {
 		return $this->public_key;
 	}
 	
+	public function private_key() {
+		$this->private_only();
+		return $this->private_key;
+	}
+	
 	public function private_only() {
 		if (!$this->is_private) {
 			header('HTTP/1.1 403 Forbidden');
