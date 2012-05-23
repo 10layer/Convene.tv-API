@@ -11,7 +11,7 @@
 			$this->db->select("users.fname, users.sname");
 			$this->db->from("comments");
 			$this->db->join("users","users.id=comments.user_id");
-			$this->db->where("urlid",$urlid)->where("publication_id", $publication_id)->where("live",true);
+			$this->db->where("urlid",$urlid)->where("comments.publication_id", $publication_id)->where("live",true);
 			//$this->db->where("parent_id",0);
 			$this->db->order_by("comments.date_created");
 			$query=$this->db->get();
