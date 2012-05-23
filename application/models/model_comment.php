@@ -19,7 +19,7 @@
 		}
 		
 		public function count_by_article($urlid, $publication_id) {
-			return $this->db->select("*")->from("comments")->where("urlid",$urlid)->where("publication_id",$publication_id)->where("live",true)->get()->num_rows();
+			return $this->db->select("*")->from("comments")->where("urlid",$urlid)->where("comments.publication_id",$publication_id)->where("live",true)->get()->num_rows();
 		}
 
 		public function get_children($id) {
@@ -33,7 +33,7 @@
 		}
 
 		public function checkdouble($urlid,$publication_id,$comment) {
-			$query=$this->db->get_where("comments",array("urlid"=>$urlid, "publication_id"=>$publication_id, "comment"=>$comment));
+			$query=$this->db->get_where("comments",array("urlid"=>$urlid, "comments.publication_id"=>$publication_id, "comment"=>$comment));
 			if ($query->num_rows()>0) {
 				return true;
 			}
@@ -45,7 +45,7 @@
 			$this->db->select("users.fname, users.sname, users.id AS user_id");
 			$this->db->from("comments");
 			$this->db->join("users","users.id=comments.user_id");
-			$this->db->where("publication_id", $publication_id);
+			$this->db->where("comments.publication_id", $publication_id);
 			$this->db->order_by("date_created DESC");
 			$this->db->limit($limit,$start);
 			$query=$this->db->get();
@@ -70,7 +70,7 @@
 			$this->db->from("comments");
 			$this->db->join("users","users.id=comments.user_id");
 			$this->db->like("comment", $searchstring);
-			$this->db->where("publication_id", $publication_id);
+			$this->db->where("comments.publication_id", $publication_id);
 			$this->db->order_by("date_created DESC");
 		}
 		
@@ -95,7 +95,7 @@
 			$this->db->or_like("users.sname", $searchstring);
 			$this->db->or_like("users.email", $searchstring);
 			$this->db->or_like("CONCAT(TRIM(users.fname), ' ', TRIM(users.sname))", $searchstring);
-			$this->db->where("publication_id", $publication_id);
+			$this->db->where("comments.publication_id", $publication_id);
 			$this->db->order_by("date_created DESC");
 		}
 		
@@ -117,18 +117,18 @@
 			$this->db->from("comments");
 			$this->db->join("users","users.id=comments.user_id");
 			$this->db->like("comments.urlid", $searchstring);
-			$this->db->where("publication_id", $publication_id);
+			$this->db->where("comments.publication_id", $publication_id);
 			$this->db->order_by("date_created DESC");
 		}
 
 		public function subscribe($urlid, $publication_id) {
 			$userid=$this->session->userdata("user_id");
-			$this->db->insert("article_alerts",array("urlid"=>$urlid,"user_id"=>$userid, "publication_id"=>$publication_id));
+			$this->db->insert("article_alerts",array("urlid"=>$urlid,"user_id"=>$userid, "comments.publication_id"=>$publication_id));
 		}
 
 		public function unsubscribe($urlid, $publication_id) {
 			$userid=$this->session->userdata("user_id");
-			$this->db->delete("article_alerts",array("urlid"=>$urlid,"user_id"=>$userid, "publication_id"=>$publication_id));
+			$this->db->delete("article_alerts",array("urlid"=>$urlid,"user_id"=>$userid, "comments.publication_id"=>$publication_id));
 		}
 
 		public function check_subscribe($urlid, $publication_id) {
@@ -136,7 +136,7 @@
 			if (empty($userid)) {
 				return false;
 			}
-			$query=$this->db->get_where("article_alerts",array("urlid"=>$urlid,"user_id"=>$userid, "publication_id"=>$publication_id));
+			$query=$this->db->get_where("article_alerts",array("urlid"=>$urlid,"user_id"=>$userid, "comments.publication_id"=>$publication_id));
 			$result=$query->row();
 			return (!empty($result->id));
 		}
@@ -167,7 +167,7 @@
 		}
 		
 		public function count_all($publication_id) {
-			return $this->db->where("publication_id", $publication_id)->get("comments")->num_rows();
+			return $this->db->where("comments.publication_id", $publication_id)->get("comments")->num_rows();
 		}
 		
 		public function unlive($comment_id) {

@@ -57,5 +57,16 @@
 			$this->db->insert("users", $dbdata);
 		}
 		
+		public function count_all($publication_id) {
+			return $this->db->where("publication_id", $publication_id)->get("users")->num_rows();
+		}
+		
+		public function getall_admin($offset, $limit, $order_by, $order_dir, $publication_id) {
+			if (empty($order_by)) {
+				$order_by="date_created";
+			}
+			return $this->db->where("publication_id", $publication_id)->order_by($order_by, $order_dir)->limit($limit, $offset)->get("users")->result();
+		}
+		
 	}
 ?>
