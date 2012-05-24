@@ -136,7 +136,7 @@
 			if (empty($userid)) {
 				return false;
 			}
-			$query=$this->db->get_where("article_alerts",array("urlid"=>$urlid,"user_id"=>$userid, "comments.publication_id"=>$publication_id));
+			$query=$this->db->get_where("article_alerts",array("urlid"=>$urlid,"user_id"=>$userid, "article_alerts.publication_id"=>$publication_id));
 			$result=$query->row();
 			return (!empty($result->id));
 		}
