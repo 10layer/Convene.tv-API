@@ -123,12 +123,12 @@
 
 		public function subscribe($urlid, $publication_id) {
 			$userid=$this->session->userdata("user_id");
-			$this->db->insert("article_alerts",array("urlid"=>$urlid,"user_id"=>$userid, "comments.publication_id"=>$publication_id));
+			$this->db->insert("article_alerts",array("urlid"=>$urlid,"user_id"=>$userid, "publication_id"=>$publication_id));
 		}
 
 		public function unsubscribe($urlid, $publication_id) {
 			$userid=$this->session->userdata("user_id");
-			$this->db->delete("article_alerts",array("urlid"=>$urlid,"user_id"=>$userid, "comments.publication_id"=>$publication_id));
+			$this->db->delete("article_alerts",array("urlid"=>$urlid,"user_id"=>$userid, "publication_id"=>$publication_id));
 		}
 
 		public function check_subscribe($urlid, $publication_id) {
