@@ -23,7 +23,50 @@
 			$publication_id=$this->convene_security->publication_id();
 			$data["private_key"]=$this->convene_security->private_key();
 			$data["count"]=$this->model_comment->count_all($publication_id);
+			$data["perpage"]=25;
 			$this->load->view("admin_console", $data);	
+		}
+		
+		public function users() {
+			$this->load->model("model_user");
+			$publication_id=$this->convene_security->publication_id();
+			$data["private_key"]=$this->convene_security->private_key();
+			$data["count"]=$this->model_user->count_all($publication_id);
+			$data["perpage"]=100;
+			$this->load->view("admin_users", $data);	
+		}
+		
+		public function get_users($offset=0, $limit=100, $order_by=false, $order_dir=false) {
+			$this->load->model("model_user");
+			if ($order_by=="undefined") {
+				$order_by=false;
+			}
+			if (($order_dir!="ASC") && ($order_dir!="DESC")) {
+				$order_dir="ASC";
+			}
+			$publication_id=$this->convene_security->publication_id();
+			$searchstring=$this->input->get_post("searchstring");
+			$data["users"]=$this->model_user->getall_admin($offset, $limit, $order_by, $order_dir, $publication_id, $searchstring);
+			$data["count"]=$this->model_user->countall_admin($publication_id, $searchstring);
+			$data["order_by"]=$order_by;
+			$data["order_dir"]=$order_dir;
+			$this->load->view("json", array("data"=>$data));
+		}
+		
+		public function user_toggle_active() {
+			$this->load->model("model_user");
+			$user_id=$this->input->get_post("user_id");
+			$user=$this->model_user->get_by_id($user_id);
+			$this->model_user->change_active($user_id, !$user->active);
+			$this->load->view("json", array("data"=>array("active"=>!$user->active)));
+		}
+		
+		public function user_toggle_moderated() {
+			$this->load->model("model_user");
+			$user_id=$this->input->get_post("user_id");
+			$user=$this->model_user->get_by_id($user_id);
+			$this->model_user->change_moderated($user_id, !$user->moderated);
+			$this->load->view("json", array("data"=>array("active"=>!$user->moderated)));
 		}
 		
 		public function get_comments($offset=0, $limit=25) {

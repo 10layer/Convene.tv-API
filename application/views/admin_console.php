@@ -1,4 +1,5 @@
 <script src="<?= base_url() ?>resources/js/underscore-min.js"></script>
+<script src="<?= base_url() ?>resources/js/backbone-min.js"></script>
 <script src="<?= base_url() ?>resources/js/jquery-1.7.2.min.js"></script>
 <script src="<?= base_url() ?>resources/js/jquery.pagination.js"></script>
 <link rel="stylesheet" href="<?= base_url() ?>resources/less/admin.css" type="text/css" media="screen, projection" charset="utf-8" />
@@ -13,6 +14,7 @@
 				$.getJSON("<?= base_url() ?>admin/get_comments/"+offset+"/25/<?= $private_key ?>?jsoncallback=?", function(data) {
 					$("#convene-comments").html("");
 					_.each(data.comments, function(comment) {
+						console.log(comment);
 						$("#convene-comments").append(_.template($("#comment-template").html(), comment));
 					});
 				});

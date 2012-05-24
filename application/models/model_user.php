@@ -61,11 +61,39 @@
 			return $this->db->where("publication_id", $publication_id)->get("users")->num_rows();
 		}
 		
-		public function getall_admin($offset, $limit, $order_by, $order_dir, $publication_id) {
+		public function getall_admin($offset, $limit, $order_by, $order_dir, $publication_id, $searchstring=false) {
 			if (empty($order_by)) {
 				$order_by="date_created";
 			}
+			if ($searchstring!=false) {
+				$this->db->like("email", $searchstring);
+				$this->db->or_like("fname", $searchstring);
+				$this->db->or_like("sname", $searchstring);
+			}
 			return $this->db->where("publication_id", $publication_id)->order_by($order_by, $order_dir)->limit($limit, $offset)->get("users")->result();
+		}
+		
+		public function countall_admin($publication_id, $searchstring=false) {
+			if ($searchstring!=false) {
+				$this->db->like("email", $searchstring);
+				$this->db->or_like("fname", $searchstring);
+				$this->db->or_like("sname", $searchstring);
+			}
+			return $this->db->where("publication_id", $publication_id)->get("users")->num_rows();
+		}
+
+		public function get_by_id($id) {
+			return $this->db->get_where("users", array("id"=>$id))->row();
+		}
+		
+		public function change_active($id, $status) {
+			$this->db->where("id",$id)->update("users", array("active"=>$status));
+			return true;
+		}
+		
+		public function change_moderated($id, $status) {
+			$this->db->where("id",$id)->update("users", array("moderated"=>$status));
+			return true;
 		}
 		
 	}
