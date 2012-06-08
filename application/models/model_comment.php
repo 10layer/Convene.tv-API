@@ -140,6 +140,11 @@
 			$result=$query->row();
 			return (!empty($result->id));
 		}
+		
+		public function get_subscribes($urlid, $publication_id) {
+			$query=$this->db->select('users.email, users.fname, article_alerts.urlid')->from('article_alerts')->join('users', 'article_alerts.user_id=users.id')->where('article_alerts.urlid',$urlid)->where('article_alerts.publication_id',$publication_id)->get();
+			return $query->result();
+		}
 
 		public function emailalert_list($articleid) {
 			$this->db->select("users.email, users.fname, users.id AS user_id");

@@ -1,4 +1,5 @@
 <script src="<?= base_url() ?>resources/js/underscore-min.js"></script>
+<script src="<?= base_url() ?>resources/js/jquery-1.7.2.min.js"></script>
 <script>
 	$(function() {
 		$(document).on("click", "#convene-submit", function() {

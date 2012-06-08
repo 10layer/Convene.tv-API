@@ -22,7 +22,7 @@
 			$publication_id=$this->convene_security->publication_id();
 			$this->load->library("comments");
 			$this->load->library("session");
-			$urlid=$this->uri->segment(3);
+			$urlid=$this->_urlid();
 			if (empty($urlid)) {
 				return false;
 			}
@@ -32,10 +32,10 @@
 		}
 		
 		public function get() {
+			$urlid=$this->_urlid();
 			$this->load->library("convene_security");
 			$publication_id=$this->convene_security->publication_id();
 			$this->load->model("model_comment");
-			$urlid=$this->uri->segment(3);
 			if (empty($urlid)) {
 				return false;
 			}
@@ -96,7 +96,8 @@
 			$this->load->view("json", array("data"=>$result));
 		}
 		
-		public function ajax_subscribe($urlid) {
+		public function ajax_subscribe() {
+			$urlid=$this->_urlid();
 			$this->load->library("convene_security");
 			$publication_id=$this->convene_security->publication_id();
 			if (empty($publication_id)) {
@@ -122,7 +123,8 @@
 			$this->load->view("json", array("data"=>$result));
 		}
 		
-		public function ajax_check_subscribe($urlid) {
+		public function ajax_check_subscribe() {
+			$urlid=$this->_urlid();
 			$this->load->library("convene_security");
 			$publication_id=$this->convene_security->publication_id();
 			if (empty($publication_id)) {
@@ -164,6 +166,7 @@
 			$publication_id=$this->convene_security->publication_id();
 			if ($this->model_comment->submit($comment, $article_id, $parent, $userid, $publication_id)) {
 				$result["success"]=true;
+				$this->_send_alerts($comment, $article_id, $parent, $userid, $publication_id);
 			} else {
 				$result["message"]="Comment already exists";
 			}
@@ -204,6 +207,36 @@
 			$redirect_array=array_slice($tmp, 2);
 			$redirect=implode("/", $redirect_array);
 			redirect($redirect);
+		}
+		
+		protected function _send_alerts($comment, $urlid, $parent, $userid, $publication_id) {
+			$submitter=$this->model_user->get_by_id($userid);
+			$url=$this->convene_security->publication_url()."/".$urlid;
+			$msg="<p>An article you have subscribed to has received a new comment.</p> <p>\"".nl2br($comment)."\"<br /><i>- {$submitter->fname} {$submitter->sname}</i></p> <p><a href='$url'>Click here to view the article</a></p>";
+			$altmsg="An article you have subscribed to has received a new comment.\n\n\"$comment\"\n{$submitter->fname} {$submitter->sname}\n\n The article is at $url";
+			$subscribes=$this->model_comment->get_subscribes($urlid, $publication_id);
+			$this->load->library('email');
+			$config["mailtype"]="html";
+			$this->email->initialize($config);
+			foreach($subscribes as $subscribe) {
+				$this->email->clear(TRUE);
+				$this->email->from("comments@dailymaverick.co.za", "Daily Maverick");
+				$this->email->to($subscribe->email);
+				$this->email->subject("Comment on Daily Maverick article");
+				$this->email->set_alt_message($altmsg);
+				$template=file_get_contents(base_url()."user/emailtemplate");
+				$html=str_replace("[CONTENT]", $msg, $template);
+				$this->email->message($html);
+				$this->email->send();
+			}
+		}
+		
+		protected function _urlid() {
+			$parts=$this->uri->segment_array();
+			array_shift($parts);
+			array_shift($parts);
+			array_pop($parts);
+			return implode('/',$parts);
 		}
 	}
 

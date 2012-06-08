@@ -60,4 +60,8 @@ class Convene_Security {
 		return $this->publication->id;
 	}
 	
+	public function publication_url() {
+		return $this->publication->url;
+	}
+	
 }

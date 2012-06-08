@@ -1,4 +1,5 @@
 <script src="<?= base_url() ?>resources/js/underscore-min.js"></script>
+<script src="<?= base_url() ?>resources/js/jquery-1.7.2.min.js"></script>
 <script>
 	$(function() {
 		$.getJSON("<?= base_url() ?>user/check_login/<?= $public_key ?>?jsoncallback=?", function(data) {
@@ -141,7 +142,7 @@
 				}
 				$("#comment_spinner").hide();
 				$("#commentform").slideUp();
-				$("#commentform").after('<div class="commentcontainer commentlevel-'+level+'"><div class="comment">'+comment+'</div><div class="comment_footer">Me, a few seconds ago</div></div>')
+				$("#commentform").after('<div class="commentcontainer commentlevel-'+level+'"><div class="comment">'+comment.replace(/\n/g, '<br />')+'</div><div class="comment_footer">Me, a few seconds ago</div></div>')
 			}, "jsonp");
 		});
 	});
