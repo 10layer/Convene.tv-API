@@ -53,6 +53,13 @@
 			$this->load->view("json", array("data"=>$data));
 		}
 		
+		public function get_user($userid) {
+			$this->load->model("model_user");
+			$publication_id=$this->convene_security->publication_id();
+			$data["user"]=$this->model_user->get_by_id($userid);
+			$this->load->view("json", array("data"=>$data));
+		}
+		
 		public function user_toggle_active() {
 			$this->load->model("model_user");
 			$user_id=$this->input->get_post("user_id");
@@ -67,6 +74,13 @@
 			$user=$this->model_user->get_by_id($user_id);
 			$this->model_user->change_moderated($user_id, !$user->moderated);
 			$this->load->view("json", array("data"=>array("active"=>!$user->moderated)));
+		}
+		
+		public function user_update() {
+			$this->load->model("model_user");
+			$user=$this->input->get_post('user');
+			$this->model_user->update($user['id'], $user);
+			$this->get_user($user['id']);
 		}
 		
 		public function get_comments($offset=0, $limit=25) {

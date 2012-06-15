@@ -96,5 +96,10 @@
 			return true;
 		}
 		
+		public function update($id, $data) {
+			$this->db->where('id', $id)->update('users', $data);
+			return true;
+		}
+		
 	}
 ?>

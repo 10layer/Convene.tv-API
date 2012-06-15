@@ -70,6 +70,36 @@
 			_convene_populate_data(0, $(this).attr("value"), dir);
 		});
 		
+		$(document).on('dblclick', '.convene-usercontainer', function() {
+			var userid=$(this).attr('userid');
+			var el=$(this);
+			($(this).hasClass('alt')) ? x=0 : x=1;
+			$.getJSON('<?= base_url() ?>admin/get_user/'+userid+'/<?= $private_key ?>?jsoncallback=?', function(data) {
+				el.before(
+					_.template(	$("#convene-edit-user-template").html(), { x: x, user: data.user } )
+				).remove();
+			});
+			return false;
+		});
+		
+		$(document).on('click', '.convene-user-save', function() {
+			var parentel=$(this).parent().parent();
+			var result={ 'id': parentel.attr('userid') };
+			(parentel.hasClass('alt')) ? x=0 : x=1;
+			parentel.children('.editable').each(function() {
+				var el=$(this).children('input').each(function() {
+					var val=$(this).val();
+					var key=$(this).attr('fieldname');
+					result[key]=val;
+				});
+			});
+			$.getJSON("<?= base_url() ?>admin/user_update/<?= $private_key ?>?jsoncallback=?", { user: result }, function(data) {
+				parentel.before(
+					_.template($("#convene-user-template").html(), { x: x, user: data.user } )
+				).remove();
+			});
+		});
+				
 		//Finally, load some data
 		_convene_populate_data();
 	});
@@ -92,27 +122,53 @@
 			<th value='company' class='cell_title <%= (data.order_by=='company' ? 'sorted '+(data.order_dir=='DESC' ? 'sort-desc' : '') : '') %>'>Company</th>
 			<th value='city' class='cell_title <%= (data.order_by=='city' ? 'sorted '+(data.order_dir=='DESC' ? 'sort-desc' : '') : '') %>'>City</th>
 			<th value='country' class='cell_title <%= (data.order_by=='country' ? 'sorted '+(data.order_dir=='DESC' ? 'sort-desc' : '') : '') %>'>Country</th>
+			<th></th>
 		</tr>
 		</thead>
 		<% var x=0; _.each(data.users, function(user){ %>
-			<tr class="convene-usercontainer <%= (x % 2) ? '' : 'alt' %>" userid="<%= user.id %>">
-				<td class="convene-active"><input type='checkbox' class='convene-active_checkbox' <%= (user.active==1) ? 'checked="checked"' : '' %> userid='<%= user.id %>' /></td>
-				<td class="convene-moderated"><input type='checkbox' class='convene-moderated_checkbox' <%= (user.moderated==1) ? 'checked="checked"' : '' %> userid='<%= user.id %>' /></td>
-				<td class="convene-name" id="convene-user-<%= user.id %>"><%= user.sname %>, <%= user.fname %></td>
-				<td class="convene-email"><%= user.email %></td>
-				<td class="convene-cel"><%= user.cel %></td>
-				<td class="convene-tel"><%= user.tel %></td>
-				<td class="convene-date_created"><%= user.date_created %></td>
-				<td class="convene-date_edited"><%= user.date_edited %></td>
-				<td class="convene-date_login"><%= user.date_login %></td>
-				<td class="convene-designation"><%= user.designation %></td>
-				<td class="convene-company"><%= user.company %></td>
-				<td class="convene-city"><%= user.city %></td>
-				<td class="convene-country"><%= user.country %></td>
-				
-			</tr>
+			<%= _.template($("#convene-user-template").html(), { x: x, user: user } ) %>
 		<% x++ }); %>
 	</table>
+</script>
+
+<script type="text/template" id="convene-user-template">
+	<tr class="convene-usercontainer <%= (x % 2) ? '' : 'alt' %>" userid="<%= user.id %>">
+	    <td class="convene-active"><input type='checkbox' class='convene-active_checkbox' <%= (user.active==1) ? 'checked="checked"' : '' %> userid='<%= user.id %>' /></td>
+	    <td class="convene-moderated"><input type='checkbox' class='convene-moderated_checkbox' <%= (user.moderated==1) ? 'checked="checked"' : '' %> userid='<%= user.id %>' /></td>
+	    <td class="convene-name editable" id="convene-user-<%= user.id %>"><%= user.sname %>, <%= user.fname %></td>
+	    <td class="convene-email editable"><%= user.email %></td>
+	    <td class="convene-cel editable"><%= user.cel %></td>
+	    <td class="convene-tel editable"><%= user.tel %></td>
+	    <td class="convene-date_created"><%= user.date_created %></td>
+	    <td class="convene-date_edited"><%= user.date_edited %></td>
+	    <td class="convene-date_login"><%= user.date_login %></td>
+	    <td class="convene-designation editable"><%= user.designation %></td>
+	    <td class="convene-company editable"><%= user.company %></td>
+	    <td class="convene-city editable"><%= user.city %></td>
+	    <td class="convene-country editable"><%= user.country %></td>
+	    <td></td>
+	</tr>
+</script>
+
+<script type="text/template" id="convene-edit-user-template">
+	<tr class="convene-edit-usercontainer <%= (x % 2) ? '' : 'alt' %>" userid="<%= user.id %>">
+	    <td class="convene-active"><input type='checkbox' class='convene-active_checkbox' <%= (user.active==1) ? 'checked="checked"' : '' %> userid='<%= user.id %>' /></td>
+	    <td class="convene-moderated"><input type='checkbox' class='convene-moderated_checkbox' <%= (user.moderated==1) ? 'checked="checked"' : '' %> userid='<%= user.id %>' /></td>
+	    <td class="convene-name editable" id="convene-user-<%= user.id %>">
+	    	<input type='text' fieldname='sname' name='convene-edit-sname' value='<%= user.sname %>' /><br /> <input type='text' fieldname='fname' name='convene-edit-fname' value='<%= user.fname %>' />
+	    </td>
+	    <td class="convene-email editable"><input type='text' fieldname='email' name='convene-edit-email' value='<%= user.email %>' /></td>
+	    <td class="convene-cel editable"><input type='text' fieldname='cel' name='convene-edit-cel' value='<%= user.cel %>' /></td>
+	    <td class="convene-tel editable"><input type='text' fieldname='tel' name='convene-edit-tel' value='<%= user.tel %>' /></td>
+	    <td class="convene-date_created"><%= user.date_created %></td>
+	    <td class="convene-date_edited"><%= user.date_edited %></td>
+	    <td class="convene-date_login"><%= user.date_login %></td>
+	    <td class="convene-designation editable"><input type='text' fieldname='designation' name='convene-edit-designation' value='<%= user.designation %>' /></td>
+	    <td class="convene-company editable"><input type='text' fieldname='company' name='convene-edit-company' value='<%= user.company %>' /></td>
+	    <td class="convene-city editable"><input type='text' fieldname='city' name='convene-edit-city' value='<%= user.city %>' /></td>
+	    <td class="convene-country editable"><input type='text' fieldname='country'  name='convene-edit-country' value='<%= user.country %>' /></td>
+	    <td><input type='button' name='save' value='Save' class='convene-user-save' /></td>
+	</tr>
 </script>
 
 <div id="convene" class="container">
