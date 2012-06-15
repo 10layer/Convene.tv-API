@@ -1,5 +1,15 @@
+<?php
+	if ($load_underscore) {
+?>
 <script src="<?= base_url() ?>resources/js/underscore-min.js"></script>
+<?php
+	}
+	if ($load_jquery) {
+?>
 <script src="<?= base_url() ?>resources/js/jquery-1.7.2.min.js"></script>
+<?php
+	}
+?>
 <script>
 	$(function() {
 		$.getJSON("<?= base_url() ?>user/check_login/<?= $public_key ?>?jsoncallback=?", function(data) {

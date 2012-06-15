@@ -28,6 +28,8 @@
 			}
 			$data["urlid"]=$urlid;
 			$data["public_key"]=$this->convene_security->public_key();
+			$data["load_jquery"]=false;
+			$data["load_underscore"]=true;
 			$this->load->view("comments",$data);
 		}
 		
