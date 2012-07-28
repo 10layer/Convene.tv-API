@@ -59,6 +59,7 @@
 		
 		public function register() {
 			$this->load->model("model_user");
+			$this->load->library("convene_security");
 			$result=array(
 				"success"=>false,
 				"message"=>"",
