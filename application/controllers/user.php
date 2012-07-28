@@ -59,7 +59,6 @@
 		
 		public function register() {
 			$this->load->model("model_user");
-			$this->load->library("convene_security");
 			$result=array(
 				"success"=>false,
 				"message"=>"",
@@ -74,7 +73,7 @@
 			$company=$this->input->get_post("company");
 			$city=$this->input->get_post("city");
 			$country=$this->input->get_post("country");
-			$publication_id=$this->convene_security->publication_id();
+			$publication_id=1; //This will only work for DM - not other pubs
 			
 			//Sanity
 			$this->load->helper("email");
