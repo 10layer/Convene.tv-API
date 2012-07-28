@@ -73,6 +73,7 @@
 			$company=$this->input->get_post("company");
 			$city=$this->input->get_post("city");
 			$country=$this->input->get_post("country");
+			$publication_id=$this->convene_security->publication_id();
 			
 			//Sanity
 			$this->load->helper("email");
@@ -112,7 +113,8 @@
 					"country"=>$country,
 					"randomcode"=>$randomcode,
 					"active"=>0,
-					"moderated"=>0
+					"moderated"=>0,
+					"publication_id"=>$publication_id,
 				)
 			);
 			$this->load->library('email');
