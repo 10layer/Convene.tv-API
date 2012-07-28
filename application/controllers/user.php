@@ -92,6 +92,16 @@
 				$this->load->view("json", array("data"=>$result));
 				return false;
 			}
+			if (strlen($fname)<3) {
+				$result["message"]="First name must be at least three characters long";
+				$this->load->view("json", array("data"=>$result));
+				return false;
+			}
+			if (strlen($sname)<3) {
+				$result["message"]="Surname must be at least three characters long";
+				$this->load->view("json", array("data"=>$result));
+				return false;
+			}
 			$checkuser=$this->model_user->get_by_email($email);
 			if (!empty($checkuser->email)) {
 				$result["message"]="The email address you supplied has already been registered";
