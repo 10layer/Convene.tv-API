@@ -30,6 +30,18 @@
 			}
 		}
 		
+		public function check_can_post($user_id) {
+			$query=$this->db->get_where("users", array("id"=>$user_id));
+			if ($query->num_rows()==0) {
+				return false;
+			}
+			$user=$query->row();
+			if ($user->moderated) {
+				return false;
+			}
+			return $user->active;
+		}
+		
 		public function get_by_email($email) {
 			$query=$this->db->get_where("users",array("email"=>$email));
 			return $query->row();

@@ -156,9 +156,14 @@
 			);
 			$this->load->library("session");
 			$this->load->library("comments");
+			$this->load->model("model_user");
 			$userid=$this->session->userdata("user_id");
 			if (empty($userid)) {
 				$result["message"]="Not logged in";
+				return $result;
+			}
+			if (!$this->model_user->check_can_post($userid)) {
+				$result["message"]="You are not allowed to post comments. Your account is not active or has been moderated.";
 				return $result;
 			}
 			if (empty($comment) || empty($article_id)) {
